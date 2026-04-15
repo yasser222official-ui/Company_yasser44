@@ -4,8 +4,8 @@ import datetime
 
 # --- 1. إعدادات المتصفح ---
 st.set_page_config(
-    page_title="نظام النخاع العصبي",
-    page_icon="🍏",
+    page_title="متابعة شركة الكينج",
+    page_icon="",
     layout="wide"
 )
 

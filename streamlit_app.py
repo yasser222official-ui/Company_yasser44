@@ -99,9 +99,9 @@ if check_password():
 
     # قسم غرفة العمليات
     elif menu == "غرفة العمليات ⚠️":
-        st.header("⚠️ سجل المشكلات اللحظي")
+        st.header("المشاكل")
         if 'logs' not in st.session_state:
-            st.session_state.logs = [{"الوقت": "08:00", "المشكلة": "بدء التشغيل", "الحالة": "مستقر"}]
+            st.session_state.logs = [{"الوقت": "08:00", "المشكلة": "بدء التشغيل", "الحالة": "حل"}]
         
         st.table(pd.DataFrame(st.session_state.logs))
         

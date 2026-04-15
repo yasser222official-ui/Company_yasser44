@@ -2,42 +2,51 @@ import streamlit as st
 import pandas as pd
 import datetime
 
-# --- 1. إعدادات المتصفح ---
+# --- 1. إعدادات المتصفح الأساسية ---
 st.set_page_config(
-    page_title="نظام النخاع العصبي | إدارة الشركة",
+    page_title="نظام النخاع العصبي | الدخول الآمن",
     page_icon="🍏",
     layout="wide"
 )
 
-# --- 2. التصميم الاحترافي (Apple Style) ودعم خط Rubik ---
-# ملاحظة: تم تصحيح الخطأ هنا باستخدام unsafe_allow_html
+# --- 2. واجهة Apple الحديثة (CSS) ---
+# تم استخدام unsafe_allow_html=True لتجنب أي تعليق في النظام
 st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <style>
-    /* تطبيق الخط العربي والاتجاه */
     html, body, [class*="css"], .stMarkdown, p, h1, h2, h3, label {
         font-family: 'Rubik', sans-serif !important;
         direction: rtl;
         text-align: right;
     }
     
+    /* تصميم صندوق الدخول */
+    .login-container {
+        background-color: #F2F2F7;
+        padding: 40px;
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+
     /* أزرار Apple الحديثة */
     .stButton>button {
-        border-radius: 12px;
+        border-radius: 15px;
         height: 3.5em;
         width: 100%;
         font-weight: bold;
         background-color: #34C759;
         color: white;
         border: none;
-        transition: 0.3s;
+        transition: 0.4s;
+        font-size: 18px;
     }
     .stButton>button:hover {
         background-color: #28a745;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: scale(1.02);
     }
 
-    /* كروت البيانات (أخضر وأحمر) */
+    /* كروت البيانات */
     .metric-card {
         padding: 25px;
         border-radius: 20px;
@@ -47,88 +56,75 @@ st.markdown("""
     }
     .green-card { background-color: #34C759; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.2); }
     .red-card { background-color: #FF3B30; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.2); }
-    
-    /* تحسين شكل القائمة الجانبية */
-    .css-1d391kg { background-color: #F2F2F7; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. نظام الأمان (Login System) ---
+# --- 3. منطق نظام الباسورد (Security Logic) ---
 def check_password():
-    if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False
+    """يرجع True إذا كانت كلمة المرور صحيحة."""
+    
+    def password_entered():
+        # هنا يمكنك تغيير الباسورد (مثلاً: Yasser2026)
+        if st.session_state["pwd_input"] == "1234": 
+            st.session_state["password_correct"] = True
+            del st.session_state["pwd_input"] # مسح الباسورد من الذاكرة المؤقتة للأمان
+        else:
+            st.session_state["password_correct"] = False
 
-    if not st.session_state.authenticated:
-        st.markdown("<h1 style='text-align: center;'>🍏 دخول النظام الآمن</h1>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1,2,1])
+    if "password_correct" not in st.session_state:
+        # شاشة الدخول الأولى
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1,1.5,1])
         with col2:
-            password = st.text_input("كلمة المرور", type="password")
-            if st.button("تسجيل الدخول"):
-                if password == "Admin2026": # يمكنك تعديل كلمة السر هنا
-                    st.session_state.authenticated = True
-                    st.rerun()
-                else:
-                    st.error("❌ كلمة المرور خاطئة")
+            st.markdown("""
+                <div class='login-container'>
+                    <h1 style='font-size: 50px;'>🍏</h1>
+                    <h2>نظام النخاع العصبي</h2>
+                    <p style='color: #8E8E93;'>أدخل كلمة مرور الإدارة للمتابعة</p>
+                </div>
+            """, unsafe_allow_html=True)
+            st.text_input("كلمة المرور", type="password", on_change=password_entered, key="pwd_input")
+            st.button("فتح النظام")
         return False
-    return True
+        
+    elif not st.session_state["password_correct"]:
+        # في حالة الخطأ
+        col1, col2, col3 = st.columns([1,1.5,1])
+        with col2:
+            st.error("❌ كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.")
+            st.text_input("كلمة المرور", type="password", on_change=password_entered, key="pwd_input")
+            st.button("إعادة المحاولة")
+        return False
+    else:
+        return True
 
-# --- 4. تشغيل واجهة التطبيق الرئيسية ---
+# --- 4. محتوى التطبيق بعد الدخول ---
 if check_password():
     
-    # القائمة الجانبية (Sidebar)
+    # القائمة الجانبية
     with st.sidebar:
         st.markdown("<h1 style='text-align: center;'></h1>", unsafe_allow_html=True)
-        st.markdown("<h3 style='text-align: center;'>لوحة القيادة</h3>", unsafe_allow_html=True)
+        st.title("مركز التحكم")
         st.divider()
-        choice = st.radio("القائمة", ["الرئيسية 🏠", "غرفة العمليات ⚠️", "تصدير البيانات 📥"])
+        menu = st.radio("القائمة الرئيسية", ["لوحة المؤشرات 📊", "غرفة العمليات ⚠️"])
         st.divider()
-        if st.button("خروج"):
-            st.session_state.authenticated = False
+        if st.button("تسجيل الخروج"):
+            st.session_state.password_correct = False
+            del st.session_state["password_correct"]
             st.rerun()
 
-    # قسم الرئيسية
-    if choice == "الرئيسية 🏠":
-        st.header("نظرة عامة على الشركة")
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown('<div class="metric-card green-card"><h3>المبيعات</h3><h1>150,000 ج.م</h1><p>أداء مستقر</p></div>', unsafe_allow_html=True)
-        with col2:
-            st.markdown('<div class="metric-card red-card"><h3>المصاريف</h3><h1>45,000 ج.م</h1><p>⚠️ تجاوز حد الأمان</p></div>', unsafe_allow_html=True)
-        with col3:
-            st.markdown('<div class="metric-card green-card"><h3>كفاءة الـ GPS</h3><h1>98%</h1><p>تغطية كاملة</p></div>', unsafe_allow_html=True)
-
-        st.divider()
-        st.subheader("حالة الأنظمة الحية")
-        status_data = pd.DataFrame({
-            "النظام": ["ERP", "تتبع السيارات", "المراقبة", "الرقم الموحد"],
-            "الحالة": ["✅ فعال", "✅ فعال", "❌ عطل", "✅ فعال"]
-        })
-        st.table(status_data)
-
-    # قسم غرفة العمليات
-    elif choice == "غرفة العمليات ⚠️":
-        st.header("⚠️ مركز إدارة الأزمات")
-        st.warning("يتم رصد المشاكل بناءً على الحساسات الذكية (Thresholds)")
-        
-        if 'issues' not in st.session_state:
-            st.session_state.issues = [
-                {"الوقت": "10:00 AM", "النوع": "مالي", "المشكلة": "تجاوز مصروفات المكتب", "الحل": "مراجعة المدير"},
-                {"الوقت": "11:30 AM", "النوع": "تقني", "المشكلة": "انقطاع كاميرا المنطقة 2", "الحل": "إعادة تشغيل"}
-            ]
-        
-        st.table(pd.DataFrame(st.session_state.issues))
-        
-        with st.form("add_issue"):
-            st.write("إضافة بلاغ يدوي")
-            desc = st.text_input("وصف المشكلة")
-            if st.form_submit_button("إرسال"):
-                st.session_state.issues.append({"الوقت": "الآن", "النوع": "يدوي", "المشكلة": desc, "الحل": "جاري التحقق"})
-                st.rerun()
-
-    # قسم التصدير
-    elif choice == "تصدير البيانات 📥":
-        st.header("إخراج التقارير")
-        df = pd.DataFrame(st.session_state.get('issues', []))
-        csv = df.to_csv(index=False).encode('utf-8-sig')
-        st.download_button("📥 تحميل سجل الأخطاء للمدير (Excel)", data=csv, file_name="report.csv", mime="text/csv")
+    if menu == "لوحة المؤشرات 📊":
+        st.header("نظرة عامة على أداء الشركة")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown('<div class="metric-card green-card"><h3>المبيعات</h3><h1>150,000 ج.م</h1><p>الحالة: ممتازة ✅</p></div>', unsafe_allow_html=True)
+        with c2:
+            st.markdown('<div class="metric-card red-card"><h3>المصاريف</h3><h1>45,000 ج.م</h1><p>الحالة: تجاوز الحد ⚠️</p></div>', unsafe_allow_html=True)
+            
+    elif menu == "غرفة العمليات ⚠️":
+        st.header("⚠️ سجل المشكلات والحلول")
+        issues = pd.DataFrame([
+            {"الوقت": "09:00", "المشكلة": "انقطاع GPS سيارة 1", "الحل المقترح": "تنبيه السائق"},
+            {"الوقت": "11:30", "المشكلة": "تجاوز ميزانية فرع أ", "الحل المقترح": "مراجعة المدير"}
+        ])
+        st.table(issues)

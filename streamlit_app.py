@@ -11,33 +11,20 @@ st.markdown("""
     html, body, [class*="css"], .stMarkdown, p, h1, h2, h3, label {
         font-family: 'Rubik', sans-serif !important; direction: rtl; text-align: right;
     }
-    .status-card { padding: 20px; border-radius: 15px; color: white; margin-bottom: 10px; text-align: center; }
-    .green-card { background-color: #34C759; }
-    .red-card { background-color: #FF3B30; }
-    .suggestion-box { background-color: #F2F2F7; padding: 15px; border-radius: 12px; border-right: 5px solid #007AFF; }
+    .suggestion-box { background-color: #F2F2F7; padding: 15px; border-radius: 12px; border-right: 5px solid #34C759; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. محرك اكتشاف الأخطاء والربط (The Logic Engine) ---
-def analyze_business_health(sales, marketing_spend, target_reached):
+# --- 2. محرك اكتشاف الأخطاء والربط ---
+def analyze_business_health(sales, mkt_spend):
     issues = []
-    
-    # ربط المبيعات بالتسويق (مثال استهداف ناس غلط)
-    if marketing_spend > 5000 and sales < 1000:
+    # سيناريو: فشل الاستهداف في التسويق
+    if mkt_spend > 5000 and sales < 1000:
         issues.append({
-            "المشكلة": "انحراف حملة التسويق",
-            "السبب": "ميزانية التسويق عالية والمبيعات منخفضة (استهداف جمهور غير مناسب)",
-            "الحل المقترح": "إيقاف الإعلان الحالي فوراً وإعادة ضبط الفئة المستهدفة لتناسب المنتج."
+            "المشكلة": "خلل في استهداف الجمهور (Marketing Mismatch)",
+            "السبب": f"صرف مرتفع ({mkt_spend}) مقابل عائد منخفض ({sales}). الإعلانات تصل لأشخاص غير مهتمين.",
+            "الحل": "إيقاف الحملة فوراً، وإعادة تحليل بيانات العملاء السابقين لضبط الاستهداف."
         })
-    
-    # ربط المبيعات بالتشغيل
-    if sales == 0:
-        issues.append({
-            "المشكلة": "توقف تدفق المبيعات",
-            "السبب": "عطل في نظام الدفع أو بوابة الـ ERP",
-            "الحل المقترح": "فحص اتصال API بين المتجر ونظام المحاسبة."
-        })
-        
     return issues
 
 # --- 3. نظام الأمان ---
@@ -45,48 +32,41 @@ if "auth" not in st.session_state: st.session_state.auth = False
 if not st.session_state.auth:
     col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        st.title("🍏 دخول النظام الذكي")
+        st.title("🍏 دخول النظام")
         pwd = st.text_input("باسورد", type="password")
         if st.button("دخول"):
             if pwd == "1234": st.session_state.auth = True; st.rerun()
+            else: st.error("خطأ!")
     st.stop()
 
-# --- 4. واجهة التحكم والربط ---
+# --- 4. واجهة التحكم ---
 st.sidebar.title(" إدارة الربط")
-page = st.sidebar.radio("المنطقة", ["لوحة التحكم حياً", "سجل الأخطاء والحلول"])
-
-# بيانات افتراضية للمحاكاة (كأنها قادمة من البرامج الأخرى)
-if 'sales_val' not in st.session_state: st.session_state.sales_val = 500
-if 'mkt_val' not in st.session_state: st.session_state.mkt_val = 6000
+page = st.sidebar.radio("المنطقة", ["لوحة التحكم حياً", "سجل الأخطاء"])
 
 if page == "لوحة التحكم حياً":
-    st.header("📊 الربط بين الأقسام (Live Sync)")
+    st.header("📊 الربط بين التسويق والمبيعات")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.session_state.sales_val = st.number_input("قيمة المبيعات الحالية (من الـ ERP)", value=st.session_state.sales_val)
-    with col2:
-        st.session_state.mkt_val = st.number_input("صرف التسويق (من Facebook/Google Ads)", value=st.session_state.mkt_val)
+    c1, c2 = st.columns(2)
+    sales = c1.number_input("المبيعات الحالية", value=500)
+    mkt = c2.number_input("صرف الإعلانات", value=6000)
     
     st.divider()
     
-    # تشغيل المحرك الذكي
-    found_issues = analyze_business_health(st.session_state.sales_val, st.session_state.mkt_val, True)
+    found_issues = analyze_business_health(sales, mkt)
     
     if found_issues:
-        st.subheader("🚨 تنبيهات النظام التلقائية")
         for issue in found_issues:
-            st.error(f"**{issue['المشكلة']}**")
+            st.error(f"🚨 اكتشاف مشكلة: {issue['المشكلة']}")
             st.markdown(f"""
                 <div class="suggestion-box">
-                    <strong>السبب المكتشف:</strong> {issue['السبب']}<br>
-                    <span style='color: #34C759;'><strong>✅ الحل الذكي:</strong> {issue['الحل المقترح']}</span>
+                    <strong>السبب المكتشف:</strong> {issue['السبب']}<br><br>
+                    <span style='color: #34C759;'><strong>✅ الحل المقترح:</strong> {issue['الحل']}</span>
                 </div><br>
             """, unsafe_allow_html=True)
     else:
-        st.success("✅ جميع الأنظمة مرتبطة وتعمل بكفاءة (لا توجد تناقضات في البيانات)")
+        st.success("✅ البيانات متناسقة. الاستهداف التسويقي يحقق نتائج جيدة.")
 
-elif page == "سجل الأخطاء والحلول":
-    st.header("📋 أرشيف الأزمات المحلولة")
-    # هنا يتم عرض الجداول السابقة التي صممناها
-    st.info("هذا القسم يسجل كل "الحلول" التي تم تنفيذها بناءً على اقتراحات النظام.")
+elif page == "سجل الأخطاء":
+    st.header("📋 أرشيف الحلول")
+    # تم تصحيح علامات التنصيص هنا لمنع الـ SyntaxError
+    st.info("هذا القسم يسجل كل 'الحلول' التي تم تنفيذها بناءً على اقتراحات النظام.")

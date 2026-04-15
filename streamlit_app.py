@@ -76,7 +76,7 @@ if check_password():
     with st.sidebar:
         st.markdown("<h1 style='text-align: center;'></h1>", unsafe_allow_html=True)
         st.title("لوحة القيادة")
-        menu = st.radio("انتقل إلى:", ["الرئيسية 🏠", "غرفة العمليات ⚠️", "تصدير 📥"])
+        menu = st.radio("نتقل إلى:", ["الرئيسية", "غرفة العمليات ⚠️", "تصدير 📥"])
         st.divider()
         if st.button("خروج"):
             st.session_state.authenticated = False
